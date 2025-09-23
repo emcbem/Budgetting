@@ -2,67 +2,72 @@
   <ng-container *ngIf="user.budgets?.length; else NoBudgets">
     <ng-container *ngIf="user.budgets as budgets">
       <ng-container *ngIf="editBudgetIndex | async as budgetIndex">
+        <ng-container *ngIf="inputMax | async as max">
+          <div class="budget-container">
+            <div class="budget-header">
+              <h3>Budgets</h3>
+              <budget-form />
+            </div>
+            <form [formGroup]="BudgetForm">
+              <ngContainer formArrayName="BudgetRows">
+                <table mat-table [dataSource]="dataSource">
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
-        {{budgetIndex}}
-        <div class="budget-container">
-          <div class="budget-header">
-            <h3>Budgets</h3>
-            <budget-form />
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
+                      <mat-form-field appearance="fill">
+                        <input matInput type="text" formControlName="name" />
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="isSavings">
+                    <th mat-header-cell *matHeaderCellDef>Is Savings</th>
+                    <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
+                      <mat-slide-toggle formControlName="isSavings"></mat-slide-toggle>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="percentage">
+                    <th mat-header-cell *matHeaderCellDef>Percentage</th>
+                    <td mat-cell *matCellDef="let budget" [formGroup]="budget">
+                      <mat-form-field>
+                        <input matInput type="number" formControlName="percentage" min="0" [max]="max">
+                      </mat-form-field>
+                    </td>
+                    {{max}}
+                  </ng-container>
+                  <ng-container matColumnDef="currentTotal">
+                    <th mat-header-cell *matHeaderCellDef>Current Total</th>
+                    <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
+                      <p>{{budget.value.currentTotal | currency}}</p>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="buttons">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let budget;">
+                      <div class="button-action-container">
+                        <div class="button-fade-container">
+                          <button class=edit-button *ngIf="budget.value.index !== budgetIndex"
+                            (click)="toggleEdit(budget.value.index)" mat-mini-fab [@inOutAnimation]>
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button *ngIf="budget.value.index === budgetIndex" (click)="saveBudget(budget.value)"
+                            mat-mini-fab [@inOutAnimation] class="save-button">
+                            <mat-icon>save</mat-icon>
+                          </button>
+                        </div>
+                        <button mat-mini-fab class="delete-button">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+                </table>
+              </ngContainer>
+            </form>
           </div>
-          <form [formGroup]="BudgetForm">
-            <ngContainer formArrayName="BudgetRows">
-              <table mat-table [dataSource]="dataSource">
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Name</th>
-                  <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
-                    <mat-form-field appearance="fill">
-                      <input matInput type="text" formControlName="name" [disabled]="budget.id === budgetIndex" />
-                    </mat-form-field>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="isSavings">
-                  <th mat-header-cell *matHeaderCellDef>Is Savings</th>
-                  <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
-                    <mat-slide-toggle formControlName="isSavings"></mat-slide-toggle>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="percentage">
-                  <th mat-header-cell *matHeaderCellDef>Percentage</th>
-                  <td mat-cell *matCellDef="let budget" [formGroup]="budget">
-                    <mat-form-field>
-                      <input matInput type="number" formControlName="percentage">
-                    </mat-form-field>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="currentTotal">
-                  <th mat-header-cell *matHeaderCellDef>Current Total</th>
-                  <td mat-cell *matCellDef="let budget; let i = index" [formGroup]="budget">
-                    <mat-form-field appearance="fill">
-                      <span matPrefix>$&nbsp;</span>
-                      <input matInput type="number" formControlName="currentTotal" min="0" step="0.01">
-                    </mat-form-field>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="buttons">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let budget;">
-                    <div class="button-action-container">
-                      <button (click)="toggleEdit(budget.value.index)" mat-mini-fab>
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-mini-fab class="delete-button">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
-                  </td>
-                </ng-container>
-              </table>
-            </ngContainer>
-          </form>
-        </div>
+        </ng-container>
       </ng-container>
     </ng-container>
   </ng-container>

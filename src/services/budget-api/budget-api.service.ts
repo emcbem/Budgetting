@@ -7,6 +7,8 @@ import { Observable, shareReplay } from 'rxjs';
 import { AiBudgetRequest } from '../../data/Ai/ai-budget-request';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { environment } from '../../environments/environment';
+import { User } from '../../data/user';
+import { Budget } from '../../data/budget';
 
 @Injectable({
   providedIn: 'root',
@@ -51,8 +53,24 @@ export class BudgetApiService {
       .patch(`${environment.apiUrl}/secured/budget/updateBudget`, updateBudget)
       .subscribe({
         next: (response) => {
-          this.userStore.refreshUser();
           console.log('Budget updated', response);
+          const currentUser = this.userStore.currentUser;
+          if (currentUser) {
+            currentUser.budgets = currentUser.budgets.map((budget) => {
+              if (budget.id === updateBudget.id) {
+                return {
+                  currentTotal: budget.currentTotal,
+                  id: budget.id,
+                  isSavings: updateBudget.isSavings,
+                  name: updateBudget.name,
+                  percentage: updateBudget.percentage,
+                } as Budget;
+              } else {
+                return budget;
+              }
+            });
+            this.userStore.updateUser(currentUser);
+          }
         },
         error: (err) => {
           console.error('Error updating budget', err);
@@ -63,21 +81,22 @@ export class BudgetApiService {
   public GetAiBudgetRequestObservable(
     userConcerns: string
   ): Observable<AiBudgetRequest> {
-    return this.httpClient.post<AiBudgetRequest>(
-      `${environment.apiUrl}/secured/budget/aibudgetrequest`,
-      { userConcerns }
-    ).pipe(shareReplay());
+    return this.httpClient
+      .post<AiBudgetRequest>(
+        `${environment.apiUrl}/secured/budget/aibudgetrequest`,
+        { userConcerns }
+      )
+      .pipe(shareReplay());
   }
 
   public AcceptAiResponse(aiResponse: AiBudgetRequest) {
-    var aiAcceptanceResponse = this.httpClient.post(
-      `${environment.apiUrl}/secured/budget/acceptaibudget`,
-      aiResponse
-    ).pipe(shareReplay());
+    var aiAcceptanceResponse = this.httpClient
+      .post(`${environment.apiUrl}/secured/budget/acceptaibudget`, aiResponse)
+      .pipe(shareReplay());
     aiAcceptanceResponse.subscribe({
       next: (value) => {
-        this.snackBar.open('Success!', "close");
-        this.userStore.refreshUser()
+        this.snackBar.open('Success!', 'close');
+        this.userStore.refreshUser();
       },
       error: (err) => {
         this.snackBar.open(

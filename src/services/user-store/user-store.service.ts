@@ -13,11 +13,15 @@ export class UserStoreService {
   user$ = this.userSubject.asObservable();
 
   constructor(private userApi: UserApiService, private auth: AuthService) {
-    this.refreshUser()
+    this.refreshUser();
+  }
+
+  updateUser(user: User): void {
+    this.userSubject.next(user);
   }
 
   refreshUser() {
-     this.auth.user$
+    this.auth.user$
       .pipe(
         filter((user) => !!user), // wait until auth emits a user
         switchMap(() => this.userApi.getUser())

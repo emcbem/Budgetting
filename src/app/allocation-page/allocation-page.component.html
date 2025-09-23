@@ -6,9 +6,15 @@
         <div class="allocation-input">
             <label>Total Made</label>
             <div class="allocation-input-number">
-                <input type="number" [(ngModel)]="totalPay"/>
+                <input type="number" [(ngModel)]="totalPay" />
                 <p>$</p>
             </div>
+        </div>
+        <div class="estimation">
+            Estimation
+            <p>Amount to Savings: {{amountToSavings | currency}} </p>
+            <p>Amount to Checking: </p>
+            <p class="danger">Unallocated funds: </p>
         </div>
         <div class="allocation-button-container">
             <button (click)="SubmitPay()" class="allocation-button">Send to budgets!</button>
